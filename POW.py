@@ -1,9 +1,11 @@
 #%% 1. proof of work
 
+from audioop import reverse
 import hashlib
 from random import *
 import time
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 # target = nombre de "0" au début du hash pour résoudre la preuve de travail
@@ -48,7 +50,21 @@ for n in range(0,100):
     
     L.append([count, executionTime])
 
+
+
+L.sort(reverse=True)
 print(L)
+
+abs = np.arange(0,len(L),1)
+
+#plt.plot(y_axis, result, label = "attacker ") #creation du plot
+plt.plot(L, label="honest mining")
+plt.xlabel('temps')
+plt.ylabel('Itérations')
+plt.show()
+# en bas les itérations 
+# en haut le temps 
+# trier les temps pour pouvoir les afficher
 
 # -> trouver le nombre de 0 dans le début du hash pour lequel la machine met moins de 20 sec à trouver
 # -> faire tourner pendant un certain temps 

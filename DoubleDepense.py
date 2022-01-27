@@ -102,7 +102,7 @@ class Blockchain:
 
 
 # double spend attack
-def attackCycle(q, z, A, v, btc, btcAttacker, NbrCycles):
+def attackCycle(q, z, A, v, btcHonest, btcAttacker, NbrCycles):
     """
     Fonction pour simuler une attaque à la double dépense.
     plusieurs params: 
@@ -110,9 +110,8 @@ def attackCycle(q, z, A, v, btc, btcAttacker, NbrCycles):
     z = nombre de confirmations
     A = délai maximum accepté par l'attaquant
     v = montant de la double dépense
-    btc = instance de la classe blockchain, blockchain officielle
+    btcHonest = instance de la classe blockchain, blockchain officielle
     btcAttacker = instante de la classe blockchain, blockchain de l'attaquant
-    NbrCycle = nbr de cycles d'attaque
     """
 
     NbAttaques = 0
@@ -125,88 +124,82 @@ def attackCycle(q, z, A, v, btc, btcAttacker, NbrCycles):
     #Durée de l'attaque
     dureeAttaque = 1 / q
 
-    while NbAttaques < NbrCycles:
+    btcHonest.modifChain([])
+    btcAttacker.modifChain([])
+
+    #PREMINAGE- ETAPE 0
+    counterBlocks = 0
+    diffBlocks = 0
+
+    # ETAPE 1
+
+    # achat d'un bien = tx
+    btcHonest.addTxinMempool("tx")
+    btcAttacker.addTxinMempool("txA")
+
+    # Mineurs honnetes minent normalement
+    while True:
+        #Minage simulé par une loi binomiale. L'attaquant a une proba q de miner un bloc
+        res = np.random.binomial(1, q)
+        dureeAttaque +=1
+
+        if(res == 1):
+            # aucun bloc de A ne contient tx mais contient txA en conflit
+            btcAttacker.addBlock()
+        else:
+            # un bloc miné par H contient tx
+            btcHonest.addBlock()
+            counterBlocks +=1
+
+        diffBlocks = len(btcHonest.getBlocks()) - len(btcAttacker.getBlocks())
         
-        btc.modifChain([])
-        btcAttacker.modifChain([])
+        #Si on atteint z confirmations ou que la limite A est atteinte, le bien est envoyé
+        if(counterBlocks >= z or (diffBlocks >= A)):
+            counterBlocks = 0
+            break 
+    
+    #Si la chaine de l'attaquant est inférieure à la chaine officielle & que le délai est encore acceptable
+    if((len(btcAttacker.getBlocks()) < len(btcHonest.getBlocks())) & (diffBlocks < A)):
 
-        NbAttaques += 1
-
-        #PREMINAGE- ETAPE 0
-        counterBlocks = 0
-        diffBlocks = 0
-
-        # ETAPE 1
-
-        # achat d'un bien = tx
-        btc.addTxinMempool("tx")
-
-        btcAttacker.addTxinMempool("txA")
-
-        # Mineurs honnetes minent normalement
         while True:
-            #Minage simulé par une loi binomiale. L'attaquant a une proba q de miner un bloc
             res = np.random.binomial(1, q)
-            dureeAttaque +=1
+            dureeAttaque += 1
 
-            if(res == 1):
-                # aucun bloc de A ne contient tx mais contient txA en conflit
+            #L'attaquant mine toujours en secret
+            if(res == 1): 
                 btcAttacker.addBlock()
 
+            #les honnetes minent toujours normalement.
             else:
-                # un bloc miné par H contient tx
-                btc.addBlock()
-                counterBlocks +=1
+                btcHonest.addBlock()
 
-            diffBlocks = len(btc.getBlocks()) - len(btcAttacker.getBlocks())
+            # calcul de la différence de longueur entre les deux chaines
+            diffBlocks = len(btcHonest.getBlocks()) - len(btcAttacker.getBlocks())
             
-            #Si on atteint z confirmations ou que la limite A est atteinte, le bien est envoyé
-            if(counterBlocks >= z or (diffBlocks >= A)):
-                counterBlocks = 0
+            #Si la chaine de l'attaquant devient plus longue que la chaine officielle ou si le délai devient trop grand
+            if((diffBlocks < 0) or diffBlocks >= A):
                 break 
-        
-        #Si la chaine de l'attaquant est inférieure à la chaine officielle & que le délai est encore acceptable
-        if((len(btcAttacker.getBlocks()) < len(btc.getBlocks())) & (diffBlocks < A)):
+    
+    #Si l'attaquant mine une blokchain plus longue que l'officielle:
+    if (len(btcAttacker.getBlocks()) > len(btcHonest.getBlocks())):
 
-            while True:
-                res = np.random.binomial(1, q)
-                dureeAttaque += 1
+        attaquesReussies +=1
+        blockMined += len(btcAttacker.getBlocks())
+        #l'attaquant publie sa blockchain qui devient officielle
+        btcHonest.modifChain(btcAttacker.getBlocks())
 
-                #L'attauqant mine toujours en secret
-                if(res == 1):
-                    
-                    btcAttacker.addBlock()
+        gains = v + blockMined
 
-                #les honnetes minent toujours normalement.
-                else:
-                    btc.addBlock()
-
-                # calcul de la différence de longueur entre les deux chaines
-                diffBlocks = len(btc.getBlocks()) - len(btcAttacker.getBlocks())
-                
-                #Si la chaine de l'attaquant devient plus longue que la chaine officielle ou si le délai devient trop grand
-                if((diffBlocks < 0) or diffBlocks >= A):
-                    break 
-        
-        #Si l'attaquant mine une blokchain plus longue que l'officielle:
-        if (len(btcAttacker.getBlocks()) > len(btc.getBlocks())):
-
-            attaquesReussies +=1
-            blockMined += len(btcAttacker.getBlocks())
-            #l'attaquant publie sa blockchain qui devient officielle
-            btc.modifChain(btcAttacker.getBlocks())
-
-            gains = v + blockMined
-
-        #gains par unité de temps
-        EsperanceGains = gains / dureeAttaque
-
+    #gains par unité de temps
+    EsperanceGains = gains / dureeAttaque
     return EsperanceGains
+
+   
 
 def calculateRatiosForListOfHashrates(z, v, A, NbrCycles):
     # liste de hashrate, doit aller de 0.01 à 1
-    listeDeHashrate = [0] * 100
-    # lsite qui contient les esperances de gains
+    listHashrate = [0] * 100
+    # liste qui contient les esperances de gains
     listeEsperanceGains = [0] * 100
 
     # création des deux instances de Blockchain()
@@ -216,11 +209,12 @@ def calculateRatiosForListOfHashrates(z, v, A, NbrCycles):
     for idx in range(1,100):
         #l'attaque est générée pour chaque idx représentant q, le hashrate de l'attaquant
         listeEsperanceGains[idx] = attackCycle(idx/100, z, A ,v, bitcoin, bicoinAttaquant, NbrCycles)
-        listeDeHashrate[idx] = idx/100
+        listHashrate[idx] = idx/100
 
-    return listeEsperanceGains, listeDeHashrate
+    return listeEsperanceGains, listHashrate
 
 
+#%%
 
 #### PARTIE DU CODE CONCERNANT L'INTERFACE GRAPHIQUE ####
 
@@ -244,12 +238,12 @@ def simulationDesAttaques(event):
     fig.clear()
 
     #On génère l'attaque 
-    listeEsperanceGains, listeDeHashrate = calculateRatiosForListOfHashrates(z.get(), v.get(), A.get(), nbrAttaques.get())
+    listeEsperanceGains, listHashrate = calculateRatiosForListOfHashrates(z.get(), v.get(), A.get(), nbrAttaques.get())
 
     #Espérance de gains en fonction du hashrate, concerne l'attaquant
-    fig.add_subplot(111).plot(listeDeHashrate, listeEsperanceGains, label='Attaquant')
+    fig.add_subplot(111).plot(listHashrate, listeEsperanceGains, label='Attaquant')
     #gains des mineurs honnetes, c'est une droite
-    fig.add_subplot(111).plot(listeDeHashrate, listeDeHashrate, label='Honnete')
+    fig.add_subplot(111).plot(listHashrate, listHashrate, label='Honnete')
     
     fig.add_subplot(111).legend(loc='best')
     fig.add_subplot(111).set_xlabel('Hashrate')
