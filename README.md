@@ -43,9 +43,10 @@ On observe que pour un certain hashrate (41.5%) l'attaque 1 + 2 est plus rentabl
 ![Attaque1+2](https://user-images.githubusercontent.com/62909821/151863990-4f75bdc5-d6af-486e-8242-607b83ead3ae.PNG)
 
 
-## Attaque à la double dépense
-
 ## Minage égoïste
+
+![selfishminning](https://user-images.githubusercontent.com/62909821/151870611-fdb23686-51d7-4028-9d2a-2c480f8f64fd.PNG)
+
 
 ## Jeu du minage / Minage optimal
 
