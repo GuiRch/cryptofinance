@@ -17,11 +17,8 @@
 
 # E(0,0,3,q,q) = 0 ssi q<sqr(2)-1
 
-# cas a > h
-# E(a,h,n,q,c) = max(h+1-c+E())
-# cas a = h
-# E()
-# cas a < h
+import matplotlib.pyplot as plt
+import numpy as np
 
 def Max(a,b):
     if a > b:
@@ -47,4 +44,27 @@ def E(a,h,n,q,c):
             return max(0, q*E(a+1,h, n-1, q, c)+(1-q)*(E(a, h+1, n-1, q, c)-c))
 
 # On cherche q min tel que E(0,0,n,q,q) > 0
-print(E(0,0,3,0.42,0.42))
+
+def courbes_simulation():
+    abs = np.arange(0,0.6,0.1)
+    esperances = []
+
+    for q in range (0,6):
+        esperances.append(E(0,0,3,q/10,q/10))
+    
+    plt.plot(abs, esperances) #creation du plot
+    #plt.plot(abs, abs, label="honest mining")
+    plt.xlabel('q')
+    plt.ylabel('espérance de gain')
+    plt.show()
+
+courbes_simulation()
+
+
+print("On remarque que la courbe croit après 0.4")
+
+print("pour q = 0.42 : " + str(E(0,0,3,0.42,0.42)))
+
+print("pour q = 0.41 : " + str(E(0,0,3,0.41,0.41)))
+
+print ( "On a donc plus précisement E(0,0,n,q,q) > 0 pour q >= 0.42")

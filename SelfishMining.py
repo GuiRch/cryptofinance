@@ -1,54 +1,5 @@
+
 #%%
-
-import random 
-
-def selfish_mining(q, N, gamma):
-    #q puissance de hashage relative
-    #gamma correspond au ratio de mineur qui vont miner sur la pool de l'attaquant 
-    H= 0 #Nombre de block de la blockchain officielle
-    R= 0 #Nombre de block miné par l'attaquant
-
-    for i in range(N):
-        j=0
-        blockchain_honnete = 0
-        block_attack = 0
-        block_diff = 0
-        while(True):
-            result1 = random.uniform(0,1) 
-            if(j == 0): #l'attaque commence si l'attaquant mine un block
-                if result1 > q:
-                    H= H+1
-                    break
-                else:
-                    j=1
-                    block_attack = block_attack+1
-            else: #On fait une simulation de qui mine le block entre l'attaquant et les honnetes mineurs
-                if result1 > q:
-                    blockchain_honnete = blockchain_honnete + 1
-                else:
-                    block_attack = block_attack+1
-                block_diff = blockchain_honnete - block_attack #On calcule la différence entre la chaine de l'attaquant et la chaine honnete
-                if block_diff == 0 : #Les deux chaines font la meme taille
-                    result2 = random.uniform(0,1) #On tire un random pour savoir si les mineurs vont miner à partir de la chaine de l'attaquant ou celle honnete
-                    if(result2<=gamma):
-                        R = R+block_attack
-                        H = H+block_attack+1
-                        break
-                    else:
-                        H= H+ blockchain_honnete + 1
-                        break
-                elif block_diff == 1: #La chaine honnete est plus longue et devient officielle
-                    H = H + blockchain_honnete
-                    break
-                elif block_diff == -1: #la chaine malhonnette est plus longue et devient officielle
-                    R = R+block_attack
-                    H = H+block_attack
-                    break
-
-    Blockchain_officielle = H / N
-    Nb_block_mine_attaquant = R/N
-    return Nb_block_mine_attaquant / Blockchain_officielle #on calcul le rendement
-
 # Outil de simulation d'un attaque double spend sur bitcoin
 
 #Libraries:
@@ -95,6 +46,9 @@ class Blockchain:
             self.blocks.append(newChain[i])
 #%%
 # Selfish mining attack
+
+import matplotlib.pyplot as plt
+import numpy as np
 
 def attackCycle(q, connectivite, chaine, NbrCycles):
     """
@@ -201,22 +155,6 @@ def attackCycle(q, connectivite, chaine, NbrCycles):
 
     return esperanceGains
 
-#### PARTIE DU CODE CONCERNANT L'INTERFACE GRAPHIQUE ####
-
-root = tkinter.Tk()
-root.wm_title("Simulation de minage égoïste")
-fig = Figure(figsize=(5, 4), dpi=100)
-
-# To create a canvas for the figure
-canvas = FigureCanvasTkAgg(fig, master=root) 
-canvas.get_tk_widget().pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=1)
-
-# To create a toolbar under the figure
-toolbar = NavigationToolbar2Tk(canvas, root)
-toolbar.update()
-canvas.get_tk_widget().pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=1)
-
-
 
 def calculateRatiosForListOfHashrates(gamma, NbrCycles):
     # liste de hashrate, doit aller de 0.01 à 1
@@ -236,31 +174,22 @@ def calculateRatiosForListOfHashrates(gamma, NbrCycles):
 #Fonction pour mettre à jour les params.
 def simulationDesAttaques(event):
 
-    fig.clear()
+    #fig.clear()
     #On génère l'attaque 
-    listeEsperanceGains, listeDeHashrate = calculateRatiosForListOfHashrates(gamma.get()/100, nbrAttaques.get())
+    listeEsperanceGains, listeDeHashrate = calculateRatiosForListOfHashrates(10/100, 10)
 
     #Espérance de gains en fonction du hashrate, concerne l'attaquant
-    fig.add_subplot(111).plot(listeDeHashrate, listeEsperanceGains, label='minage égoïste')
+    plt.plot(listeDeHashrate, listeEsperanceGains, label='minage égoïste')
     #gains des mineurs honnetes, c'est une droite
     y1 = [0] * 49
     for i in range(len(y1)):
         y1[i]=(listeDeHashrate[i]*6.25)/600
-    fig.add_subplot(111).plot(listeDeHashrate, y1, label='stratégie honnête')
+    plt.plot(listeDeHashrate, y1, label='stratégie honnête')
+    plt.xlabel('puissance de hashage')
+    plt.ylabel('rendement')
     
-    fig.add_subplot(111).legend(loc='best')
-    fig.add_subplot(111).set_xlabel('Hashrate')
-    fig.add_subplot(111).set_ylabel('Esperance de gain')
-    fig.add_subplot(111).set_title('Simulation de minage égoïste')
-    canvas.draw()
-
-#Pour créer les "sliders"
-gamma = tkinter.Scale(master=root, from_=0,to=100, orient=tkinter.HORIZONTAL, length=200,
-                                        label="gamma : divisé par 100. connectivité", command=simulationDesAttaques)
-gamma.pack(side=tkinter.LEFT)
-
-nbrAttaques = tkinter.Scale(master=root, from_=1, to=500, orient=tkinter.HORIZONTAL, length=200,
-                                  label="n : nbr d'attaques", command=simulationDesAttaques)
-nbrAttaques.pack(side=tkinter.RIGHT)
-
-tkinter.mainloop()
+    # fig.add_subplot(111).legend(loc='best')
+    # fig.add_subplot(111).set_xlabel('Hashrate')
+    # fig.add_subplot(111).set_ylabel('Esperance de gain')
+    # fig.add_subplot(111).set_title('Simulation de minage égoïste')
+    plt.show()

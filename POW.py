@@ -42,7 +42,7 @@ executionTime = tmps2-tmps1
 print("Temps d'execution = " + str((tmps2 - tmps1)))
 
 L = []
-for n in range(0,100):
+for n in range(0,1000):
     tmps1=time.time()       
     count = proofOfWork(target)
     tmps2=time.time()
@@ -65,6 +65,8 @@ plt.show()
 # en bas les itérations 
 # en haut le temps 
 # trier les temps pour pouvoir les afficher
+
+#étude statistique -> temps d'attente loi exponentielle 
 
 # -> trouver le nombre de 0 dans le début du hash pour lequel la machine met moins de 20 sec à trouver
 # -> faire tourner pendant un certain temps 

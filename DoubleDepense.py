@@ -23,15 +23,20 @@ def minage(h):
         return 0
 
 def simulationDoubleSpend(h,A,v,z):
-    regularBlockchain = 0
-    attacker = 0
+    bchHonest = 0
+    bchAttacker = 0
     attackerDelay = 0
+    diffBlocks = 0
+
+    confirmations = 0
     
     while (attackerDelay < A):
         if(minage(h) == 1):
-            attacker += 1
+            bchAttacker += 1
         else:
-            regularBlockchain +=1
+            bchHonest +=1
+        confirmations += 1
+
         # attackerDelay = abs()
 
 #%% 4 bis 

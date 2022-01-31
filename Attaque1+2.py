@@ -4,35 +4,36 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def minage(h):
-    n = random()
-    hashRate = h/100
-    if (n < hashRate):
-        return 1
-    else:
-        return 0
+def selfishMining(proba):
+    Block=np.random.choice(('A','B'),p=[proba/100,1-proba/100])
+    return Block
     
-def selfishMining(h):
-    if(minage(h) == 1):
-        return("win")
-    else:
-        return("lose")
-    
-def attack(hashrate): # execute the scenario of the attack
-    Results = []
-    test = selfishMining(hashrate)
-    if test == "lose":
-        Results.append("B")
-        return Results
-    else:
-        Results.append("A")
-        test = selfishMining(hashrate)
-        for i in range(0, 2):
-            if(test == "win"):
-                Results.append("A")
+
+def attack(proba):
+    Tentative1 =  selfishMining(proba) 
+    if(Tentative1 =='A'):
+        Tentative2=selfishMining(proba)
+        Tentative3=selfishMining(proba)
+        #AAX
+        if(Tentative2 =='A'):
+            #AAA
+            if(Tentative3 =='A'):
+                return ['A', 'A', 'A']
+            #AAB
             else:
-                Results.append("B")
-        return (Results)
+                P=(1-proba)*proba**2
+                return ['A', 'A', 'B']
+        #ABX
+        else:
+            #ABA
+            if(Tentative3 =='A'):
+                return ['A', 'B', 'A']
+            #ABB
+            else:
+                return ['A', 'B', 'B']
+        #BXX
+    else:
+        return ['B']
     
 
 # rendement R1 + ... + Rn / H1 + ... + Hn    
@@ -50,10 +51,11 @@ def benefit(hashrate): # Count what does the attack give to the attacker
         return ([0,1])
 
 L = []
-hashrate = 50
-for n in range(0,10000):
+hashrate = 42
+for n in range(0,100):
     L.append(benefit(hashrate))
-
+    
+print(L)
 deno = 0
 num = 0
 for elem in L:
@@ -68,7 +70,7 @@ def simulation():
     results = []
     L=[]
     for hashrate in range(1,50):
-        for n in range(0,10000):
+        for n in range(0,100):
             L.append(benefit(hashrate))
         deno = 0
         num = 0
@@ -78,16 +80,19 @@ def simulation():
             
         rendement = num/deno
         #print(rendement)
+        #results.append([rendement,hashrate])
         results.append(rendement)
     return results
+
 
 # faire un graph avec diférent hashrate
 
 rendements = simulation()
-abs = np.arange(1,50,1)
+print(rendements)
+abs = np.arange(0.01,0.50,0.01)
 
-plt.plot(abs, rendements, label = "attacker ") #creation du plot
-plt.plot(abs, abs, label="honest mining")
+plt.plot(abs, rendements) #creation du plot
+#plt.plot(abs, abs, label="honest mining")
 plt.xlabel('puissance de hashage')
 plt.ylabel('rendement')
 plt.show()
