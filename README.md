@@ -13,7 +13,10 @@ La fonction `proofOfWork` simule la preuve de travail, et compte le nombre d'it�
 
 ### Résultat
 
-On retrouve la distribution d'une loi exponentielle
+On retrouve la distribution d'une loi exponentielle.
+
+![POW](https://user-images.githubusercontent.com/62909821/151864524-6bac4758-cd47-4eff-90f7-f2fe117399b5.PNG)
+
 
 ## Attaque 1 + 2 
 
@@ -35,12 +38,15 @@ Puis on simule en fonction de diférents hashrate le rendement de l'attaque sur 
 
 ### Résultats
 
-On devrait observer que le rendement est au dessus de la courbe de l'axe x=y pour un hashrate supérieur à 41.5% ce qui n'est pas le cas, et je ne sais pas pourquoi.
+On observe que pour un certain hashrate (41.5%) l'attaque 1 + 2 est plus rentable que le minage honnête.
 
+![Attaque1+2](https://user-images.githubusercontent.com/62909821/151863990-4f75bdc5-d6af-486e-8242-607b83ead3ae.PNG)
 
-## Attaque à la double dépense
 
 ## Minage égoïste
+
+![selfishminning](https://user-images.githubusercontent.com/62909821/151870611-fdb23686-51d7-4028-9d2a-2c480f8f64fd.PNG)
+
 
 ## Jeu du minage / Minage optimal
 
