@@ -70,7 +70,7 @@ def simulation():
     results = []
     L=[]
     for hashrate in range(1,50):
-        for n in range(0,100):
+        for n in range(0,10000):
             L.append(benefit(hashrate))
         deno = 0
         num = 0

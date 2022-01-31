@@ -1,6 +1,5 @@
 
 #%%
-# Outil de simulation d'un attaque double spend sur bitcoin
 
 #Libraries:
 import math
@@ -44,7 +43,7 @@ class Blockchain:
         self.blocks = []
         for i in range(0, len(newChain)):
             self.blocks.append(newChain[i])
-#%%
+
 # Selfish mining attack
 
 import matplotlib.pyplot as plt
@@ -172,7 +171,7 @@ def calculateRatiosForListOfHashrates(gamma, NbrCycles):
     return listeEsperanceGains, listeDeHashrate
 
 #Fonction pour mettre à jour les params.
-def simulationDesAttaques(event):
+def simulationDesAttaques():
 
     #fig.clear()
     #On génère l'attaque 
@@ -193,3 +192,6 @@ def simulationDesAttaques(event):
     # fig.add_subplot(111).set_ylabel('Esperance de gain')
     # fig.add_subplot(111).set_title('Simulation de minage égoïste')
     plt.show()
+
+simulationDesAttaques()
+
